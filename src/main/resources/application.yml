@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: rush-java
+
+# AgentScope 配置
+agentscope:
+  model:
+    # API 基础地址
+    base-url: https://api.deepseek.com/v1
+    # API Key
+    api-key: xxxxxxxxxx
+    # 模型名称（推荐使用 deepseek-chat）
+    model-name: deepseek-chat
+    # 是否启用流式输出
+    stream: true
+  
+  agent:
+    # Agent 名称
+    name: quickstart-agent
+    # 系统提示词
+    sys-prompt: 你是一个帮助用户做笔记的助手。
+  
+  workspace:
+    # 工作区路径
+    path: .agentscope/workspace
+  
+  compaction:
+    # 触发压缩的消息数量阈值
+    trigger-messages: 30
+    # 压缩后保留的消息数量
+    keep-messages: 10
+    # 压缩前是否刷新事实到日流水账
+    flush-before-compact: true
+
+server:
+  port: 8080
