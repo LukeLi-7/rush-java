@@ -175,6 +175,68 @@
             text-align: center;
             border-bottom: 1px solid #bbdefb;
         }
+
+        .markdown-body p,
+        .markdown-body ul,
+        .markdown-body ol,
+        .markdown-body blockquote,
+        .markdown-body pre,
+        .markdown-body table {
+            margin-bottom: 10px;
+        }
+
+        .markdown-body p:last-child,
+        .markdown-body ul:last-child,
+        .markdown-body ol:last-child,
+        .markdown-body blockquote:last-child,
+        .markdown-body pre:last-child,
+        .markdown-body table:last-child {
+            margin-bottom: 0;
+        }
+
+        .markdown-body ul,
+        .markdown-body ol {
+            padding-left: 22px;
+        }
+
+        .markdown-body code {
+            background: #f1f3f4;
+            border-radius: 4px;
+            padding: 2px 5px;
+            font-family: SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        .markdown-body pre {
+            background: #f6f8fa;
+            border-radius: 8px;
+            overflow-x: auto;
+            padding: 12px;
+        }
+
+        .markdown-body pre code {
+            background: transparent;
+            padding: 0;
+        }
+
+        .markdown-body blockquote {
+            border-left: 4px solid #d0d7de;
+            color: #57606a;
+            padding-left: 12px;
+        }
+
+        .markdown-body table {
+            border-collapse: collapse;
+            display: block;
+            overflow-x: auto;
+            width: 100%;
+        }
+
+        .markdown-body th,
+        .markdown-body td {
+            border: 1px solid #d0d7de;
+            padding: 6px 10px;
+        }
     </style>
 </head>
 <body>
@@ -206,7 +268,14 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
     <script>
+        marked.setOptions({
+            breaks: true,
+            gfm: true
+        });
+
         let currentSessionId = null;
         const chatInput = document.getElementById('chatInput');
         const sendButton = document.getElementById('sendButton');
@@ -323,7 +392,7 @@
                     case 'message':
                         // 累积回复内容
                         fullReply += (fullReply ? '\n' : '') + eventData;
-                        contentDiv.textContent = fullReply;
+                        renderMarkdown(contentDiv, fullReply);
                         // 滚动到底部
                         chatMessages.scrollTop = chatMessages.scrollHeight;
                         break;
@@ -358,8 +427,12 @@
             messageDiv.className = `message ${type}`;
             
             const contentDiv = document.createElement('div');
-            contentDiv.className = 'message-content';
-            contentDiv.textContent = content;
+            contentDiv.className = type === 'ai' ? 'message-content markdown-body' : 'message-content';
+            if (type === 'ai') {
+                renderMarkdown(contentDiv, content);
+            } else {
+                contentDiv.textContent = content;
+            }
             
             messageDiv.appendChild(contentDiv);
             chatMessages.appendChild(messageDiv);
@@ -368,6 +441,16 @@
             chatMessages.scrollTop = chatMessages.scrollHeight;
             
             return messageDiv;
+        }
+
+        function renderMarkdown(contentDiv, markdownText) {
+            if (!markdownText) {
+                contentDiv.textContent = '';
+                return;
+            }
+
+            const unsafeHtml = marked.parse(markdownText);
+            contentDiv.innerHTML = DOMPurify.sanitize(unsafeHtml);
         }
 
         function showError(message) {
